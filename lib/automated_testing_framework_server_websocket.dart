@@ -14,4 +14,5 @@ export 'src/models/application.dart';
 
 export 'src/server/server.dart';
 
+export 'src/typedefs/custom_server_command_handler.dart';
 export 'src/typedefs/server_command_handler.dart';

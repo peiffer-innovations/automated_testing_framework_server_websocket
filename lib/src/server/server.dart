@@ -11,16 +11,20 @@ import 'package:uuid/uuid.dart';
 class Server {
   Server({
     InternetAddress address,
+    Map<String, CustomServerCommandHandler> handlers,
     String deviceSecret,
     String driverSecret,
+    Function(WebSocket socket) onDone,
     this.port = 5333,
   })  : address = address ?? InternetAddress.anyIPv4,
+        _customHandlers = handlers ?? {},
         _deviceSecret = deviceSecret ??
             Platform.environment['ATF_DEVICE_SECRET'] ??
             Uuid().v4(),
         _driverSecret = driverSecret ??
             Platform.environment['ATF_DRIVER_SECRET'] ??
-            Uuid().v4();
+            Uuid().v4(),
+        _onDone = onDone;
 
   static final Logger _logger = Logger('Server');
 
@@ -28,8 +32,10 @@ class Server {
   final int port;
 
   final Map<String, Application> _applications = {};
+  final Map<String, CustomServerCommandHandler> _customHandlers;
   final String _deviceSecret;
   final String _driverSecret;
+  final Function(WebSocket socket) _onDone;
 
   final Map<String, ServerCommandHandler> _handlers = {
     GoodbyeCommand.kCommandType: GoodbyeHandler().handle,
@@ -46,12 +52,17 @@ class Server {
 
     await for (var req in server) {
       await runZonedGuarded(() async {
-        _logger.info('[CONNECTION]: connection received');
+        _logger.info(
+          '[CONNECTION]: connection received -- ${req.headers['host']}',
+        );
 
         // Upgrade a HttpRequest to a WebSocket connection.
         var socket = await WebSocketTransformer.upgrade(req);
         var timer = Timer(Duration(minutes: 2), () async {
           try {
+            _logger.info(
+              '[CONNECTION]: connection timed out -- ${req.connectionInfo.remoteAddress}',
+            );
             await socket?.close();
             socket = null;
           } catch (e) {
@@ -79,12 +90,19 @@ class Server {
             if (cmd == null) {
               socket.close();
             } else {
-              if (comm == null) {
+              var customHandler = _customHandlers[cmd.type];
+              if (customHandler != null) {
+                customHandler(
+                  command: cmd,
+                  server: this,
+                  socket: socket,
+                );
+              } else if (comm == null) {
                 if (cmd is AnnounceDeviceCommand) {
                   timer?.cancel();
                   timer = null;
 
-                  _respondToChallenge(
+                  respondToChallenge(
                     commandId: cmd.id,
                     salt: cmd.salt,
                     secret: _deviceSecret,
@@ -105,7 +123,7 @@ class Server {
                   timer?.cancel();
                   timer = null;
 
-                  _respondToChallenge(
+                  respondToChallenge(
                     commandId: cmd.id,
                     salt: cmd.salt,
                     secret: _driverSecret,
@@ -174,6 +192,10 @@ class Server {
               app.drivers.remove((comm as Driver).driverId);
               comm?.close();
             }
+
+            if (_onDone != null) {
+              _onDone(socket);
+            }
           },
           onError: (e, stack) {
             if (comm is Driver && session == null) {
@@ -183,10 +205,37 @@ class Server {
           },
         );
       }, (e, stack) {
-        // _logger.severe('Error processing socket', e, stack);
         // no-op, ignore.  Just don't kill the server because of it.
       });
     }
+  }
+
+  void respondToChallenge({
+    @required String commandId,
+    @required String salt,
+    @required String secret,
+    @required WebSocket socket,
+    @required DateTime timestamp,
+  }) {
+    if ((DateTime.now().millisecondsSinceEpoch -
+                timestamp.millisecondsSinceEpoch)
+            .abs() >=
+        300000) {
+      throw Exception('[EXPIRED]: received expired challenge');
+    }
+
+    socket.add(
+      ChallengeResponseCommand(
+        commandId: commandId,
+        signature: DriverSignatureHelper().createSignature(
+          secret,
+          [
+            salt,
+            timestamp.millisecondsSinceEpoch.toString(),
+          ],
+        ),
+      ).toString(),
+    );
   }
 
   Application _getApplication(String appIdentifier) {
@@ -236,33 +285,5 @@ class Server {
     }
 
     return result;
-  }
-
-  void _respondToChallenge({
-    @required String commandId,
-    @required String salt,
-    @required String secret,
-    @required WebSocket socket,
-    @required DateTime timestamp,
-  }) {
-    if ((DateTime.now().millisecondsSinceEpoch -
-                timestamp.millisecondsSinceEpoch)
-            .abs() >=
-        300000) {
-      throw Exception('[EXPIRED]: received expired challenge');
-    }
-
-    socket.add(
-      ChallengeResponseCommand(
-        commandId: commandId,
-        signature: DriverSignatureHelper().createSignature(
-          secret,
-          [
-            salt,
-            timestamp.millisecondsSinceEpoch.toString(),
-          ],
-        ),
-      ).toString(),
-    );
   }
 }
