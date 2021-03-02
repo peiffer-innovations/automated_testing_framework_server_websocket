@@ -76,7 +76,9 @@ abstract class WebSocketCommunicator {
       if (DateTime.now().millisecondsSinceEpoch -
               startTime.millisecondsSinceEpoch >
           sendTimeout.inMilliseconds) {
-        logger.info('[SEND COMMAND]: timeout attempting to send command');
+        logger.info(
+          '[SEND COMMAND]: timeout attempting to send command: [${command.type}]',
+        );
         throw Exception('Timeout');
       }
     }

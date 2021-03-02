@@ -6,6 +6,8 @@ import 'package:meta/meta.dart';
 
 typedef CustomServerCommandHandler = Future<void> Function({
   @required DeviceCommand command,
+  @required WebSocketCommunicator communicator,
+  @required void Function(WebSocketCommunicator) onUpgradeCommunicator,
   @required Server server,
   @required WebSocket socket,
 });

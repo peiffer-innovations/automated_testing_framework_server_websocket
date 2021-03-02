@@ -94,9 +94,19 @@ class Server {
               if (customHandler != null) {
                 customHandler(
                   command: cmd,
+                  communicator: comm,
+                  onUpgradeCommunicator: (communicator) {
+                    comm = communicator;
+                    _logger.info(
+                        '[CUSTOM]: received upgrade request to [${communicator.runtimeType}]');
+                  },
                   server: this,
                   socket: socket,
                 );
+                if (comm != null) {
+                  timer?.cancel();
+                  timer = null;
+                }
               } else if (comm == null) {
                 if (cmd is AnnounceDeviceCommand) {
                   timer?.cancel();
@@ -142,6 +152,9 @@ class Server {
                     '[DRIVER]: received announcement: [${cmd.driverId}] -- [${cmd.driverName}]',
                   );
                 } else {
+                  _logger.info(
+                    '[UNKNOWN]: unknown command, closing socket!',
+                  );
                   // unknown command
                   socket.close();
                 }
