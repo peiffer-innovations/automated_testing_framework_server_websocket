@@ -30,8 +30,8 @@ class Server {
 
   final InternetAddress address;
   final int port;
+  final Map<String, Application> applications = {};
 
-  final Map<String, Application> _applications = {};
   final Map<String, CustomServerCommandHandler> _customHandlers;
   final String _deviceSecret;
   final String _driverSecret;
@@ -252,10 +252,10 @@ class Server {
   }
 
   Application _getApplication(String appIdentifier) {
-    var app = _applications[appIdentifier];
+    var app = applications[appIdentifier];
     if (app == null) {
       app = Application(appIdentifier: appIdentifier);
-      _applications[appIdentifier] = app;
+      applications[appIdentifier] = app;
     }
 
     return app;
