@@ -3,9 +3,9 @@ import 'package:automated_testing_framework_server_websocket/automated_testing_f
 
 class PingHandler {
   Future<void> handle({
-    Application app,
-    DeviceCommand command,
-    WebSocketCommunicator comm,
+    Application? app,
+    DeviceCommand? command,
+    WebSocketCommunicator? comm,
   }) async {
     if (command is PingCommand && comm is Device) {
       comm.testControllerState =

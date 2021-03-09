@@ -5,13 +5,13 @@ import 'package:automated_testing_framework_server_websocket/automated_testing_f
 
 class ReserveDeviceHandler {
   Future<void> handle({
-    Application app,
-    DeviceCommand command,
-    WebSocketCommunicator comm,
+    Application? app,
+    DeviceCommand? command,
+    WebSocketCommunicator? comm,
   }) async {
     if (command is ReserveDeviceCommand) {
       if (comm is Driver) {
-        var device = app.devices[command.deviceId];
+        var device = app!.devices[command.deviceId];
 
         var deviceReserved = app.sessions.values
                 .where(
@@ -31,7 +31,7 @@ class ReserveDeviceHandler {
           );
 
           var completer = Completer();
-          var timer = Timer(
+          Timer? timer = Timer(
             ServerConfiguration().reservationTimeout,
             () => completer
                 .completeError('[TIMEOUT]: reservation request timed out'),
@@ -41,12 +41,11 @@ class ReserveDeviceHandler {
             if (cmd is CommandAck && cmd.commandId == command.id) {
               comm.onCommandReceived = onCmd;
               if (cmd.success == true) {
-                Session session;
+                late Session session;
                 session = Session(
                   device: device,
                   driver: comm,
                   onClose: () async {
-                    await comm.sendCommand(GoodbyeCommand(complete: true));
                     comm.close();
 
                     app.sessions.remove(session.id);
@@ -54,7 +53,7 @@ class ReserveDeviceHandler {
                   },
                 );
 
-                await session.start();
+                session.start();
                 timer?.cancel();
                 timer = null;
                 completer.complete();

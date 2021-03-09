@@ -1,16 +1,13 @@
 import 'package:automated_testing_framework_models/automated_testing_framework_models.dart';
 import 'package:automated_testing_framework_server_websocket/automated_testing_framework_server_websocket.dart';
-import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
 class Session {
   Session({
-    @required this.device,
-    @required this.driver,
-    @required this.onClose,
-  })  : assert(device != null),
-        assert(driver != null),
-        assert(onClose != null);
+    required this.device,
+    required this.driver,
+    required this.onClose,
+  });
 
   final Device device;
   final Driver driver;
@@ -42,14 +39,14 @@ class Session {
         await driver.sendCommand(command);
 
         if (command is ReleaseDeviceCommand) {
-          await close();
+          close();
         } else if (command is GoodbyeCommand) {
           if (command.complete == true) {
             await driver.sendCommand(
               ReleaseDeviceCommand(deviceId: device.device.id),
             );
 
-            await close();
+            close();
           }
         }
       } catch (e) {
@@ -64,14 +61,14 @@ class Session {
         await device.sendCommand(command);
 
         if (command is ReleaseDeviceCommand) {
-          await close();
+          close();
         } else if (command is GoodbyeCommand) {
           if (command.complete == true) {
             await device.sendCommand(
               ReleaseDeviceCommand(deviceId: device.device.id),
             );
 
-            await close();
+            close();
           }
         }
       } catch (e) {

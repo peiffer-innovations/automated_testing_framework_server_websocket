@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -39,6 +40,19 @@ Future<void> main(List<String> args) async {
   var parsed = parser.parse(args);
 
   var secrets = <String, dynamic>{};
+  var file = File('secret/keys.json');
+  if (file.existsSync()) {
+    var data = file.readAsStringSync();
+    if (data.trim().isNotEmpty == true) {
+      try {
+        var result = json.decode(data);
+        secrets['device'] = result['device'];
+        secrets['driver'] = result['driver'];
+      } catch (e) {
+        // no-op
+      }
+    }
+  }
 
   var server = Server(
     address: InternetAddress.tryParse(parsed['address']),

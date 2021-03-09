@@ -4,6 +4,6 @@ import 'package:test/test.dart';
 void main() {
   test('ServerConfiguration', () {
     var config = ServerConfiguration();
-    expect(config != null, true);
+    expect(config is ServerConfiguration, true);
   });
 }

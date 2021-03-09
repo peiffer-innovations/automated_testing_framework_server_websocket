@@ -5,16 +5,15 @@ import 'dart:io';
 import 'package:automated_testing_framework_models/automated_testing_framework_models.dart';
 import 'package:automated_testing_framework_server_websocket/automated_testing_framework_server_websocket.dart';
 import 'package:logging/logging.dart';
-import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
 class Server {
   Server({
-    InternetAddress address,
-    Map<String, CustomServerCommandHandler> handlers,
-    String deviceSecret,
-    String driverSecret,
-    Function(WebSocket socket) onDone,
+    InternetAddress? address,
+    Map<String, CustomServerCommandHandler>? handlers,
+    String? deviceSecret,
+    String? driverSecret,
+    Function(WebSocket? socket)? onDone,
     this.port = 5333,
   })  : address = address ?? InternetAddress.anyIPv4,
         _customHandlers = handlers ?? {},
@@ -29,13 +28,13 @@ class Server {
   static final Logger _logger = Logger('Server');
 
   final InternetAddress address;
-  final int port;
+  final int? port;
   final Map<String, Application> applications = {};
 
   final Map<String, CustomServerCommandHandler> _customHandlers;
   final String _deviceSecret;
   final String _driverSecret;
-  final Function(WebSocket socket) _onDone;
+  final Function(WebSocket? socket)? _onDone;
 
   final Map<String, ServerCommandHandler> _handlers = {
     GoodbyeCommand.kCommandType: GoodbyeHandler().handle,
@@ -46,7 +45,7 @@ class Server {
   Future<void> listen() async {
     var server = await HttpServer.bind(
       address,
-      port,
+      port!,
     );
     _logger.info('[SERVER]: listening at ${server.address}:${server.port}');
 
@@ -57,29 +56,29 @@ class Server {
         );
 
         // Upgrade a HttpRequest to a WebSocket connection.
-        var socket = await WebSocketTransformer.upgrade(req);
-        var timer = Timer(Duration(minutes: 2), () async {
+        WebSocket? socket = await WebSocketTransformer.upgrade(req);
+        Timer? timer = Timer(Duration(minutes: 2), () async {
           try {
             _logger.info(
-              '[CONNECTION]: connection timed out -- ${req.connectionInfo.remoteAddress}',
+              '[CONNECTION]: connection timed out -- ${req.connectionInfo!.remoteAddress}',
             );
-            await socket?.close();
+            await socket?.close(408, 'Timeout');
             socket = null;
           } catch (e) {
             // no-op
           }
         });
 
-        Application app;
-        WebSocketCommunicator comm;
+        Application? app;
+        WebSocketCommunicator? comm;
         var challenge = ChallengeCommand(
           salt: DriverSignatureHelper().createSalt(),
         );
-        Session session;
+        Session? session;
 
-        socket.listen(
+        socket!.listen(
           (event) {
-            DeviceCommand cmd;
+            DeviceCommand? cmd;
 
             try {
               cmd = DeviceCommand.fromDynamic(json.decode(event));
@@ -88,7 +87,9 @@ class Server {
             }
 
             if (cmd == null) {
-              socket.close();
+              _logger.info('[CLOSE]: closing socket due to null command.');
+
+              socket!.close(400, 'Null Command');
             } else {
               var customHandler = _customHandlers[cmd.type];
               if (customHandler != null) {
@@ -116,7 +117,7 @@ class Server {
                     commandId: cmd.id,
                     salt: cmd.salt,
                     secret: _deviceSecret,
-                    socket: socket,
+                    socket: socket!,
                     timestamp: cmd.timestamp,
                   );
 
@@ -124,8 +125,8 @@ class Server {
                   challenge = ChallengeCommand(
                     salt: DriverSignatureHelper().createSalt(),
                   );
-                  socket.add(challenge.toString());
-                  comm = _getDevice(app, cmd.device, cmd.testControllerState);
+                  socket!.add(challenge.toString());
+                  comm = _getDevice(app!, cmd.device, cmd.testControllerState);
                   _logger.info(
                     '[DEVICE]: received announcement: [${cmd.device.id}]',
                   );
@@ -137,26 +138,26 @@ class Server {
                     commandId: cmd.id,
                     salt: cmd.salt,
                     secret: _driverSecret,
-                    socket: socket,
+                    socket: socket!,
                     timestamp: cmd.timestamp,
                   );
 
                   app = _getApplication(cmd.appIdentifier);
-                  var driver = _getDriver(app, cmd.driverId, cmd.driverName);
+                  var driver = _getDriver(app!, cmd.driverId, cmd.driverName);
                   challenge = ChallengeCommand(
                     salt: DriverSignatureHelper().createSalt(),
                   );
-                  socket.add(challenge.toString());
+                  socket!.add(challenge.toString());
                   comm = driver;
                   _logger.info(
                     '[DRIVER]: received announcement: [${cmd.driverId}] -- [${cmd.driverName}]',
                   );
                 } else {
                   _logger.info(
-                    '[UNKNOWN]: unknown command, closing socket!',
+                    '[CLOSE]: unknown command, closing socket!',
                   );
                   // unknown command
-                  socket.close();
+                  socket!.close(500, 'Unknown Command');
                 }
               } else {
                 if (cmd is ChallengeResponseCommand) {
@@ -165,7 +166,10 @@ class Server {
                           .abs() >
                       300000) {
                     // more than 5 minutes on either side of the clock, go away.
-                    socket.close();
+                    _logger.info(
+                      '[CLOSE]: closing socket due to expired challenge response.',
+                    );
+                    socket!.close(403, 'Expired Challenge');
                   } else {
                     if (DriverSignatureHelper().createSignature(
                             comm is Device ? _deviceSecret : _driverSecret, [
@@ -173,10 +177,10 @@ class Server {
                           challenge.timestamp.millisecondsSinceEpoch.toString(),
                         ]) ==
                         cmd.signature) {
-                      comm.attachSocket(socket);
+                      comm!.attachSocket(socket);
 
                       if (comm is Driver) {
-                        comm.onCommandReceived = (command) async {
+                        comm!.onCommandReceived = (command) async {
                           var handler = _handlers[command.type];
                           if (handler != null) {
                             await handler(
@@ -191,28 +195,30 @@ class Server {
                       _logger.info(
                         '[CHALLENGE]: challenge response has invalid signature',
                       );
-                      socket.close();
+                      socket!.close(401, 'Invalid response');
                     }
                   }
                 } else {
-                  comm.onCommandReceived(cmd);
+                  comm!.onCommandReceived(cmd);
                 }
               }
             }
           },
           onDone: () {
+            _logger.info('[CLOSE]: onDone called');
             if (comm is Driver && session == null) {
-              app.drivers.remove((comm as Driver).driverId);
+              app!.drivers.remove((comm as Driver).driverId);
               comm?.close();
             }
 
             if (_onDone != null) {
-              _onDone(socket);
+              _onDone!(socket);
             }
           },
           onError: (e, stack) {
             if (comm is Driver && session == null) {
-              app.drivers.remove((comm as Driver).driverId);
+              app!.drivers.remove((comm as Driver).driverId);
+              _logger.severe('[CLOSE]: closing socket due to error.', e, stack);
               comm?.close();
             }
           },
@@ -224,11 +230,11 @@ class Server {
   }
 
   void respondToChallenge({
-    @required String commandId,
-    @required String salt,
-    @required String secret,
-    @required WebSocket socket,
-    @required DateTime timestamp,
+    required String commandId,
+    required String salt,
+    required String secret,
+    required WebSocket socket,
+    required DateTime timestamp,
   }) {
     if ((DateTime.now().millisecondsSinceEpoch -
                 timestamp.millisecondsSinceEpoch)

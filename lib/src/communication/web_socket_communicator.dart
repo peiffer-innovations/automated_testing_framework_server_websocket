@@ -2,25 +2,23 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:automated_testing_framework_models/automated_testing_framework_models.dart';
-import 'package:automated_testing_framework_server_websocket/automated_testing_framework_server_websocket.dart';
 import 'package:logging/logging.dart';
-import 'package:meta/meta.dart';
 
 abstract class WebSocketCommunicator {
   WebSocketCommunicator({
-    @required this.logger,
+    required this.logger,
     this.sendTimeout = const Duration(minutes: 1),
-    this.timeout = const Duration(minutes: 2),
-  }) : assert(logger != null);
+    this.timeout = const Duration(minutes: 5),
+  });
 
   final Logger logger;
   final Duration sendTimeout;
   final Duration timeout;
 
   DateTime _lastPing = DateTime.now();
-  Future<void> Function(DeviceCommand) _onCommandReceived;
-  WebSocket _socket;
-  Timer _timeoutTimer;
+  Future<void> Function(DeviceCommand)? _onCommandReceived;
+  WebSocket? _socket;
+  Timer? _timeoutTimer;
 
   DateTime get lastPing => _lastPing;
   bool get online => _socket?.readyState == WebSocket.open;
@@ -37,11 +35,11 @@ abstract class WebSocketCommunicator {
           if (command is! CommandAck) {
             logger.info('[RECEIVED COMMAND]: received: [${command.type}]');
           }
-          await _onCommandReceived(command);
+          await _onCommandReceived!(command);
         }
       };
 
-  void attachSocket(WebSocket socket) {
+  void attachSocket(WebSocket? socket) {
     logger.info('[SOCKET]: attached');
     _socket = socket;
     _lastPing = DateTime.now();
@@ -50,16 +48,7 @@ abstract class WebSocketCommunicator {
   }
 
   void close() {
-    if (_socket != null) {
-      logger.info('[SOCKET]: closed');
-      try {
-        if (_socket.readyState == WebSocket.open) {
-          _socket.add(GoodbyeCommand(complete: true).toString());
-        }
-      } catch (e) {
-        // no-op
-      }
-    }
+    logger.info('[SOCKET]: closed');
 
     _timeoutTimer?.cancel();
     _timeoutTimer = null;
@@ -70,28 +59,35 @@ abstract class WebSocketCommunicator {
 
   Future<void> sendCommand(DeviceCommand command) async {
     var startTime = DateTime.now();
-    while (_socket?.readyState != WebSocket.open) {
-      await Future.delayed(Duration(milliseconds: 100));
+    if (command is! GoodbyeCommand) {
+      while (_socket?.readyState != WebSocket.open) {
+        await Future.delayed(Duration(milliseconds: 100));
 
-      if (DateTime.now().millisecondsSinceEpoch -
-              startTime.millisecondsSinceEpoch >
-          sendTimeout.inMilliseconds) {
-        logger.info(
-          '[SEND COMMAND]: timeout attempting to send command: [${command.type}]',
-        );
-        throw Exception('Timeout');
+        if (DateTime.now().millisecondsSinceEpoch -
+                startTime.millisecondsSinceEpoch >
+            sendTimeout.inMilliseconds) {
+          logger.info(
+            '[SEND COMMAND]: timeout attempting to send command: [${command.type}]',
+          );
+          throw Exception('Timeout');
+        }
       }
     }
 
-    _socket.add(command.toString());
-    logger.info('[SEND COMMAND]: sent: [${command.type}]');
+    if (_socket?.readyState == WebSocket.open) {
+      _socket!.add(command.toString());
+      logger.info('[SEND COMMAND]: sent: [${command.type}]');
+    }
   }
 
   void _resetTimeout() {
     _timeoutTimer?.cancel();
     _timeoutTimer = null;
 
-    var pingTimeout = ServerConfiguration().pingTimeout;
-    _timeoutTimer = Timer(pingTimeout, () => close());
+    var pingTimeout = timeout;
+    _timeoutTimer = Timer(pingTimeout, () {
+      logger.info('[CLOSED]: closed by lack of ping.');
+      close();
+    });
   }
 }

@@ -2,20 +2,19 @@ import 'dart:async';
 
 import 'package:automated_testing_framework_server_websocket/automated_testing_framework_server_websocket.dart';
 
-import 'package:meta/meta.dart';
-
 class Application {
   Application({
-    @required this.appIdentifier,
-  }) : assert(appIdentifier != null) {
+    required this.appIdentifier,
+    Duration staleTimeout = const Duration(minutes: 15),
+  }) {
     _timer = Timer.periodic(Duration(minutes: 1), (timer) {
-      var timeout = DateTime.now().millisecondsSinceEpoch -
-          Duration(minutes: 5).inMilliseconds;
+      var timeout =
+          DateTime.now().millisecondsSinceEpoch - staleTimeout.inMilliseconds;
 
       var staleDevices = devices.keys.where(
-          (key) => devices[key].lastPing.millisecondsSinceEpoch < timeout);
+          (key) => devices[key]!.lastPing.millisecondsSinceEpoch < timeout);
       var staleDrivers = drivers.keys.where(
-          (key) => drivers[key].lastPing.millisecondsSinceEpoch < timeout);
+          (key) => drivers[key]!.lastPing.millisecondsSinceEpoch < timeout);
 
       devices.removeWhere((key, value) => staleDevices.contains(value));
       drivers.removeWhere((key, value) => staleDrivers.contains(value));
@@ -38,7 +37,7 @@ class Application {
   final Map<String, Driver> drivers = {};
   final Map<String, Session> sessions = {};
 
-  Timer _timer;
+  Timer? _timer;
 
   void stop() {
     _timer?.cancel();

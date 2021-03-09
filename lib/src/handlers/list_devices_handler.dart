@@ -3,12 +3,12 @@ import 'package:automated_testing_framework_server_websocket/automated_testing_f
 
 class ListDevicesHandler {
   Future<void> handle({
-    Application app,
-    DeviceCommand command,
-    WebSocketCommunicator comm,
+    Application? app,
+    DeviceCommand? command,
+    WebSocketCommunicator? comm,
   }) async {
     if (command is ListDevicesCommand) {
-      var devices = app.devices.values
+      var devices = app!.devices.values
           .where((device) =>
               device.online == true &&
               (device.driverName == null || command.availableOnly != true))
@@ -26,7 +26,7 @@ class ListDevicesHandler {
         ),
       );
 
-      await comm.sendCommand(reply);
+      await comm!.sendCommand(reply);
     }
   }
 }

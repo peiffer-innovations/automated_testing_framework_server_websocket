@@ -3,15 +3,15 @@ import 'package:automated_testing_framework_server_websocket/automated_testing_f
 
 class GoodbyeHandler {
   Future<void> handle({
-    Application app,
-    DeviceCommand command,
-    WebSocketCommunicator comm,
+    Application? app,
+    DeviceCommand? command,
+    WebSocketCommunicator? comm,
   }) async {
     if (command is GoodbyeCommand) {
-      comm.close();
+      comm!.close();
 
       if (command.complete == true) {
-        app.devices.removeWhere((_, value) => value == comm);
+        app!.devices.removeWhere((_, value) => value == comm);
         app.drivers.removeWhere((_, value) => value == comm);
 
         app.sessions.removeWhere((_, session) {

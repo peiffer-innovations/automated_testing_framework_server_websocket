@@ -1,3 +1,10 @@
+## [0.9.4] - March 9th, 2021
+
+* More customization updates
+* Bug Fixes
+* Null Safety
+
+
 ## [0.9.3] - March 2st, 2021
 
 * More customization updates
