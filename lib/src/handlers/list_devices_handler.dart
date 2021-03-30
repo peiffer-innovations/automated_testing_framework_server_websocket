@@ -13,7 +13,7 @@ class ListDevicesHandler {
               device.online == true &&
               (device.driverName == null || command.availableOnly != true))
           .toList();
-      devices.sort();
+      devices.sort((a, b) => a.device.compareTo(b.device));
 
       var reply = CommandAck(
         commandId: command.id,

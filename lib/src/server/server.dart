@@ -161,41 +161,53 @@ class Server {
                 }
               } else {
                 if (cmd is ChallengeResponseCommand) {
-                  if ((DateTime.now().millisecondsSinceEpoch -
-                              challenge.timestamp.millisecondsSinceEpoch)
-                          .abs() >
-                      300000) {
-                    // more than 5 minutes on either side of the clock, go away.
-                    _logger.info(
-                      '[CLOSE]: closing socket due to expired challenge response.',
-                    );
-                    socket!.close(403, 'Expired Challenge');
-                  } else {
-                    if (DriverSignatureHelper().createSignature(
-                            comm is Device ? _deviceSecret : _driverSecret, [
+                  if (cmd.commandId == challenge.id) {
+                    if ((DateTime.now().millisecondsSinceEpoch -
+                                challenge.timestamp.millisecondsSinceEpoch)
+                            .abs() >
+                        300000) {
+                      // more than 5 minutes on either side of the clock, go away.
+                      _logger.info(
+                        '[CLOSE]: closing socket due to expired challenge response.',
+                      );
+                      socket!.close(403, 'Expired Challenge');
+                    } else {
+                      var secret =
+                          comm is Device ? _deviceSecret : _driverSecret;
+                      var signature = DriverSignatureHelper().createSignature(
+                        secret,
+                        [
                           challenge.salt,
                           challenge.timestamp.millisecondsSinceEpoch.toString(),
-                        ]) ==
-                        cmd.signature) {
-                      comm!.attachSocket(socket);
-
-                      if (comm is Driver) {
-                        comm!.onCommandReceived = (command) async {
-                          var handler = _handlers[command.type];
-                          if (handler != null) {
-                            await handler(
-                              app: app,
-                              command: command,
-                              comm: comm,
-                            );
-                          }
-                        };
-                      }
-                    } else {
-                      _logger.info(
-                        '[CHALLENGE]: challenge response has invalid signature',
+                        ],
                       );
-                      socket!.close(401, 'Invalid response');
+                      if (signature == cmd.signature) {
+                        comm!.attachSocket(socket);
+
+                        if (comm is Driver) {
+                          comm!.onCommandReceived = (command) async {
+                            var handler = _handlers[command.type];
+                            if (handler != null) {
+                              await handler(
+                                app: app,
+                                command: command,
+                                comm: comm,
+                              );
+                            }
+                          };
+                        }
+                      } else {
+                        _logger.info(
+                          '[CHALLENGE]: challenge response has invalid signature',
+                        );
+
+                        print('[ID]: ${challenge!.id}');
+                        print('[SALT]: ${challenge!.salt}');
+                        print(
+                            '[TIMESTAMP]: ${challenge!.timestamp.millisecondsSinceEpoch.toString()}');
+
+                        socket!.close(401, 'Invalid response');
+                      }
                     }
                   }
                 } else {

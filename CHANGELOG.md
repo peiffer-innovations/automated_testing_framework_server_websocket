@@ -1,3 +1,8 @@
+## [0.9.4] - March 30th, 2021
+
+* Minor bug fixes
+
+
 ## [0.9.4] - March 9th, 2021
 
 * More customization updates
