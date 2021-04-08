@@ -54,6 +54,7 @@ class ReserveDeviceHandler {
                 );
 
                 session.start();
+                app.sessions[session.id] = session;
                 timer?.cancel();
                 timer = null;
                 completer.complete();

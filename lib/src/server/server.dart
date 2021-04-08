@@ -74,7 +74,6 @@ class Server {
         var challenge = ChallengeCommand(
           salt: DriverSignatureHelper().createSalt(),
         );
-        Session? session;
 
         socket!.listen(
           (event) {
@@ -185,26 +184,43 @@ class Server {
                         comm!.attachSocket(socket);
 
                         if (comm is Driver) {
-                          comm!.onCommandReceived = (command) async {
-                            var handler = _handlers[command.type];
-                            if (handler != null) {
-                              await handler(
-                                app: app,
-                                command: command,
-                                comm: comm,
-                              );
-                            }
-                          };
+                          var driver = comm as Driver;
+                          var sessions = app?.sessions.values.where(
+                            (session) =>
+                                session.driver.driverId == driver.driverId,
+                          );
+
+                          if (sessions?.isNotEmpty == true) {
+                            var session = sessions!.first;
+                            session.start();
+                          } else {
+                            comm!.onCommandReceived = (command) async {
+                              var handler = _handlers[command.type];
+                              if (handler != null) {
+                                await handler(
+                                  app: app,
+                                  command: command,
+                                  comm: comm,
+                                );
+                              }
+                            };
+                          }
+                        } else if (comm is Device) {
+                          var device = comm as Device;
+                          var sessions = app?.sessions.values.where(
+                            (session) =>
+                                session.device.device.id == device.device.id,
+                          );
+
+                          if (sessions?.isNotEmpty == true) {
+                            var session = sessions!.first;
+                            session.start();
+                          }
                         }
                       } else {
                         _logger.info(
                           '[CHALLENGE]: challenge response has invalid signature',
                         );
-
-                        print('[ID]: ${challenge!.id}');
-                        print('[SALT]: ${challenge!.salt}');
-                        print(
-                            '[TIMESTAMP]: ${challenge!.timestamp.millisecondsSinceEpoch.toString()}');
 
                         socket!.close(401, 'Invalid response');
                       }
@@ -217,10 +233,22 @@ class Server {
             }
           },
           onDone: () {
-            _logger.info('[CLOSE]: onDone called');
-            if (comm is Driver && session == null) {
-              app!.drivers.remove((comm as Driver).driverId);
-              comm?.close();
+            _logger.info('[CLOSE]: onDone called: [${comm?.toString()}');
+
+            if (comm is Driver) {
+              var driver = comm as Driver;
+              var inSession = app?.sessions.values
+                      .where((session) =>
+                          driver.driverId == session.driver.driverId)
+                      .isNotEmpty ==
+                  true;
+              if (inSession != true) {
+                _logger.info(
+                  '[CLOSE]: no session, driver removed: [${comm?.toString()}',
+                );
+                app!.drivers.remove((comm as Driver).driverId);
+                comm?.close();
+              }
             }
 
             if (_onDone != null) {
@@ -228,10 +256,22 @@ class Server {
             }
           },
           onError: (e, stack) {
-            if (comm is Driver && session == null) {
-              app!.drivers.remove((comm as Driver).driverId);
-              _logger.severe('[CLOSE]: closing socket due to error.', e, stack);
-              comm?.close();
+            if (comm is Driver) {
+              var driver = comm as Driver;
+              var inSession = app?.sessions.values
+                      .where((session) =>
+                          driver.driverId == session.driver.driverId)
+                      .isNotEmpty ==
+                  true;
+              if (inSession != true) {
+                app!.drivers.remove((comm as Driver).driverId);
+                _logger.severe(
+                  '[CLOSE]: no session, driver removed: [${comm?.toString()}',
+                  e,
+                  stack,
+                );
+                comm?.close();
+              }
             }
           },
         );
@@ -313,6 +353,8 @@ class Server {
         driverName: driverName,
       );
       app.drivers[driverId] = result;
+    } else {
+      _logger.info('[REATTACHING DRIVER]: $driverId');
     }
 
     return result;

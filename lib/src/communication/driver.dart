@@ -8,9 +8,15 @@ class Driver extends WebSocketCommunicator {
     required this.driverName,
   }) : super(
           logger: Logger('DRIVER: $driverName - $driverId'),
-        );
+        ) {
+    logger.fine(toString());
+  }
 
   final String appIdentifier;
   final String driverId;
   final String driverName;
+
+  @override
+  String toString() =>
+      '[DRIVER] - [$appIdentifier] - [$driverId] - [$driverName]';
 }

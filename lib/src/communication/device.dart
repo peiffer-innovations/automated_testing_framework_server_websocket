@@ -11,7 +11,10 @@ class Device extends WebSocketCommunicator {
     this.testControllerState,
   }) : super(
           logger: Logger('DEVICE: ${device.id}'),
-        );
+        ) {
+    logger.fine('[APPLICATION]: $appIdentifier');
+    logger.fine(toString());
+  }
 
   /// The unique identifier
   final String appIdentifier;
@@ -19,9 +22,20 @@ class Device extends WebSocketCommunicator {
   String? driverName;
   TestControllerState? testControllerState;
 
+  @override
+  void close() {
+    sendCommand(ReleaseDeviceCommand(deviceId: device.id));
+
+    super.close();
+  }
+
   ConnectedDevice toConnectedDevice() => ConnectedDevice(
         device: device,
         driverName: driverName,
         testControllerState: testControllerState!,
       );
+
+  @override
+  String toString() =>
+      '[DEVICE]: ${device.os} | ${device.manufacturer} | ${device.brand} | ${device.device} | ${device.model} | ${device.buildNumber}';
 }

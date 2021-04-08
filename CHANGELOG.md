@@ -1,3 +1,10 @@
+## [0.9.5+1] - April 7th, 2021
+
+* Clean up device reservation better
+* Fixes for reconnecting drivers
+* Dependency updates
+
+
 ## [0.9.4] - March 30th, 2021
 
 * Minor bug fixes
