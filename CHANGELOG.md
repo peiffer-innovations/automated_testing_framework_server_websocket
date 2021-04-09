@@ -1,3 +1,8 @@
+## [0.9.5+2] - April 9th, 2021
+
+* Logging updates
+
+
 ## [0.9.5+1] - April 7th, 2021
 
 * Clean up device reservation better

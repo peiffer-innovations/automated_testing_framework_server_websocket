@@ -66,7 +66,9 @@ class Session {
           }
         }
       } catch (e, stack) {
-        _logger.severe('[ERROR]: device error receiving command', e, stack);
+        if (closed != true) {
+          _logger.severe('[ERROR]: device error receiving command', e, stack);
+        }
         close();
       }
     }
@@ -93,7 +95,9 @@ class Session {
           }
         }
       } catch (e, stack) {
-        _logger.severe('[ERROR]: driver error receiving command', e, stack);
+        if (closed != true) {
+          _logger.severe('[ERROR]: driver error receiving command', e, stack);
+        }
         close();
       }
     }

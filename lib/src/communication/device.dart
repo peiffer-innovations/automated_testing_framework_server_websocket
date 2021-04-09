@@ -9,8 +9,10 @@ class Device extends WebSocketCommunicator {
     required this.device,
     this.driverName,
     this.testControllerState,
+    Duration? timeout,
   }) : super(
           logger: Logger('DEVICE: ${device.id}'),
+          timeout: const Duration(minutes: 5),
         ) {
     logger.fine('[APPLICATION]: $appIdentifier');
     logger.fine(toString());

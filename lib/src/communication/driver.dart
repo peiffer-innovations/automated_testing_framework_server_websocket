@@ -6,8 +6,10 @@ class Driver extends WebSocketCommunicator {
     required this.appIdentifier,
     required this.driverId,
     required this.driverName,
+    Duration? timeout,
   }) : super(
           logger: Logger('DRIVER: $driverName - $driverId'),
+          timeout: timeout ?? const Duration(minutes: 5),
         ) {
     logger.fine(toString());
   }
