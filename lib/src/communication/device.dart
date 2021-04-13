@@ -12,7 +12,7 @@ class Device extends WebSocketCommunicator {
     Duration? timeout,
   }) : super(
           logger: Logger('DEVICE: ${device.id}'),
-          timeout: const Duration(minutes: 5),
+          timeout: timeout ?? const Duration(minutes: 5),
         ) {
     logger.fine('[APPLICATION]: $appIdentifier');
     logger.fine(toString());
@@ -20,7 +20,7 @@ class Device extends WebSocketCommunicator {
 
   /// The unique identifier
   final String appIdentifier;
-  final TestDeviceInfo device;
+  TestDeviceInfo device;
   String? driverName;
   TestControllerState? testControllerState;
 

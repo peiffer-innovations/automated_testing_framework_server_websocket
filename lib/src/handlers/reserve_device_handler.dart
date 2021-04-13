@@ -49,6 +49,7 @@ class ReserveDeviceHandler {
                     comm.close();
 
                     app.sessions.remove(session.id);
+                    app.devices.remove(device.device.id);
                     app.drivers.remove(comm.driverId);
                   },
                 );

@@ -13,6 +13,7 @@ class Session {
             Logger(
               'Session - [${device.device.id}] [${driver.driverName}]',
             ) {
+    device.driverName = driver.driverName;
     _logger.info('[SESSION]: opened');
   }
 
@@ -50,7 +51,12 @@ class Session {
           await driver.sendCommand(command);
         }
 
-        if (command is ReleaseDeviceCommand) {
+        if (command is PingCommand) {
+          device.device = command.testDeviceInfo ?? device.device;
+          device.testControllerState =
+              command.testControllerState ?? device.testControllerState;
+        } else if (command is ReleaseDeviceCommand) {
+          device.driverName = null;
           _logger.info('[COMMAND]: device self released');
           close();
         } else if (command is GoodbyeCommand) {
