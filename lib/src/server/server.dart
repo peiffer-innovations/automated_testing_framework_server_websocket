@@ -98,7 +98,8 @@ class Server {
                   onUpgradeCommunicator: (communicator) {
                     comm = communicator;
                     _logger.info(
-                        '[CUSTOM]: received upgrade request to [${communicator.runtimeType}]');
+                      '[CUSTOM]: received upgrade request to [${communicator.runtimeType}]',
+                    );
                   },
                   server: this,
                   socket: socket,

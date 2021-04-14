@@ -83,7 +83,7 @@ abstract class WebSocketCommunicator {
         var waitedTime = DateTime.now().millisecondsSinceEpoch - startTime;
 
         if (waitedTime > timeout) {
-          logger.info(
+          logger.warning(
             '[SEND COMMAND]: timeout attempting to send command: [${command.type}] -- [$waitedTime]',
           );
           throw Exception('Timeout');
@@ -96,7 +96,7 @@ abstract class WebSocketCommunicator {
       if (command is CommandAck || command is PingCommand) {
         logger.finest('[SEND COMMAND]: sent: [${command.type}]');
       } else {
-        logger.info('[SEND COMMAND]: sent: [${command.type}]');
+        logger.fine('[SEND COMMAND]: sent: [${command.type}]');
       }
     }
   }

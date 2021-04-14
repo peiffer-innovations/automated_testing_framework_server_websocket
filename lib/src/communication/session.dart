@@ -85,7 +85,9 @@ class Session {
       try {
         if (command is! PingCommand && command is! GoodbyeCommand) {
           await device.sendCommand(command);
-        } else if (command is ReleaseDeviceCommand) {
+        }
+
+        if (command is ReleaseDeviceCommand) {
           _logger.info('[COMMAND]: driver released device');
           close();
         } else if (command is GoodbyeCommand) {

@@ -1,6 +1,8 @@
-## [0.9.5+2] - April 13th, 2021
+## [0.9.5+4] - April 13th, 2021
 
 * Fix to properly announce driver name for driven devices
+* Fix to properly release the device
+* Reduced logging
 
 
 ## [0.9.5+2] - April 9th, 2021
