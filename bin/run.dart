@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:automated_testing_framework_models/automated_testing_framework_models.dart';
 import 'package:automated_testing_framework_server_websocket/automated_testing_framework_server_websocket.dart';
+import 'package:automated_testing_framework_server_websocket/src/security/authentication/handlers/challenge_response_auth_command_handler.dart';
 import 'package:logging/logging.dart';
+import 'package:uuid/uuid.dart';
 
 Future<void> main(List<String> args) async {
   Logger.root.level = Level.ALL;
@@ -37,7 +41,24 @@ Future<void> main(List<String> args) async {
     help: 'Port for the server to listen on.',
   );
 
+  parser.addFlag('help', abbr: 'h');
+
   var parsed = parser.parse(args);
+
+  if (parsed['help'] == true) {
+    // ignore: avoid_print
+    print('''
+Usage: run [<options>]
+
+Starts the websocket server for the testing framework.
+
+-a, --address=<address>        The hostname or address for the server to listen on.
+-h, --help                     Display this help message.
+-p, --port=<port>              Port for the server to listen on.
+''');
+
+    exit(0);
+  }
 
   var secrets = <String, dynamic>{};
   var file = File('secret/keys.json');
@@ -54,12 +75,52 @@ Future<void> main(List<String> args) async {
     }
   }
 
-  var server = Server(
-    address: InternetAddress.tryParse(parsed['address']),
-    deviceSecret: secrets['device'],
-    driverSecret: secrets['driver'],
-    port: int.tryParse(parsed['port']),
-  );
+  var deviceSecret = secrets['device'] ??
+      Platform.environment['ATF_DEVICE_SECRET'] ??
+      Uuid().v4();
 
-  await server.listen();
+  var driverSecret = secrets['driver'] ??
+      Platform.environment['ATF_DRIVER_SECRET'] ??
+      Uuid().v4();
+
+  var running = true;
+  var sigintSub = ProcessSignal.sigint.watch().listen((event) {
+    running = false;
+
+    // ignore: avoid_print
+    print('SIGINT received');
+
+    Timer(Duration(seconds: 2), () {
+      // ignore: avoid_print
+      print('force quitting');
+      exit(0);
+    });
+  });
+  try {
+    while (running) {
+      var server = Server(
+        address: InternetAddress.tryParse(parsed['address']),
+        authenticator: DefaultAuthenticator(handlers: {
+          AnnounceDeviceCommand.kCommandType:
+              AnnounceDeviceAuthCommandHandler(deviceSecret),
+          AnnounceDriverCommand.kCommandType:
+              AnnounceDriverAuthCommandHandler(driverSecret),
+          ChallengeResponseCommand.kCommandType:
+              ChallengeResponseAuthCommandHandler({
+            Device: deviceSecret,
+            Driver: driverSecret,
+          }),
+        }),
+        port: int.tryParse(parsed['port']),
+      );
+
+      await server.listen();
+    }
+  } finally {
+    await sigintSub.cancel();
+  }
+
+  // ignore: avoid_print
+  print('server shutdown');
+  exit(0);
 }

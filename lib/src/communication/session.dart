@@ -3,7 +3,14 @@ import 'package:automated_testing_framework_server_websocket/automated_testing_f
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
+/// Represents a connected session between a device driver and a device.
 class Session {
+  /// Constructs the session with the [device] to be controlled, the [driver]
+  /// performing the controlling actions, an optional [logger] that will be used
+  /// for log events (instead of the unique class level loger if not set).
+  ///
+  /// This also requires an [onClose] that will be called when the the session
+  /// is fully closed by either the [device] or the [driver].
   Session({
     required this.device,
     required this.driver,

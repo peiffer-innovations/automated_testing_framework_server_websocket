@@ -5,12 +5,14 @@ import 'package:logging/logging.dart';
 /// Represents a connected device capable of receiving test commands.
 class Device extends WebSocketCommunicator {
   Device({
+    required Application app,
     required this.appIdentifier,
     required this.device,
     this.driverName,
     this.testControllerState,
     Duration? timeout,
   }) : super(
+          app: app,
           logger: Logger('DEVICE: ${device.id}'),
           timeout: timeout ?? const Duration(minutes: 5),
         ) {
@@ -18,12 +20,21 @@ class Device extends WebSocketCommunicator {
     logger.fine(toString());
   }
 
-  /// The unique identifier
+  /// The unique identifier for the application.
   final String appIdentifier;
+
+  /// The test device information.
   TestDeviceInfo device;
+
+  /// The name of the connected driver, if one exists.
   String? driverName;
+
+  /// The current state of the device with regards to the testing framework, if
+  /// known.
   TestControllerState? testControllerState;
 
+  /// Closes the session with the device and releases it back to the available
+  /// pool should it reconnect.
   @override
   void close() {
     sendCommand(ReleaseDeviceCommand(deviceId: device.id));
@@ -31,6 +42,8 @@ class Device extends WebSocketCommunicator {
     super.close();
   }
 
+  /// Mapping utility that converts this model into a [ConnectedDevice]
+  /// instance suitable for transmission across the socket.
   ConnectedDevice toConnectedDevice() => ConnectedDevice(
         device: device,
         driverName: driverName,

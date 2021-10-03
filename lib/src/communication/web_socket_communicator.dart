@@ -2,17 +2,22 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:automated_testing_framework_models/automated_testing_framework_models.dart';
+import 'package:automated_testing_framework_server_websocket/automated_testing_framework_server_websocket.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
 abstract class WebSocketCommunicator {
   WebSocketCommunicator({
+    required this.app,
     required this.logger,
+    this.params = const {},
     this.sendTimeout = const Duration(minutes: 2),
     this.timeout = const Duration(minutes: 5),
   });
 
+  final Application app;
   final Logger logger;
+  final Map<String, dynamic> params;
   final Duration sendTimeout;
   final Duration timeout;
 
@@ -25,8 +30,14 @@ abstract class WebSocketCommunicator {
   DateTime get lastPing => _lastPing;
   bool get online => _socket?.readyState == WebSocket.open;
 
-  set onCommandReceived(Future<void> Function(DeviceCommand) handler) =>
-      _onCommandReceived = handler;
+  set onCommandReceived(Future<void> Function(DeviceCommand) handler) {
+    if (handler == onCommandReceived) {
+      throw Exception(
+        '[LOOP]: Attempted to register the same handler as [onCommandReceived]; aborting',
+      );
+    }
+    _onCommandReceived = handler;
+  }
 
   Future<void> Function(DeviceCommand) get onCommandReceived =>
       (command) async {

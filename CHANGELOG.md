@@ -1,3 +1,11 @@
+## [1.0.0] - October 3rd, 2021
+
+* Update to prevent loops via the command handler
+* Documentation
+* Complete refactor of the authentication and authorization strategy
+
+
+
 ## [0.9.5+4] - April 13th, 2021
 
 * Fix to properly announce driver name for driven devices
