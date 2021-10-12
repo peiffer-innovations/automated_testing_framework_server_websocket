@@ -20,6 +20,7 @@ export 'src/security/authentication/default_authenticator.dart';
 export 'src/security/authentication/handlers/announce_device_auth_command_handler.dart';
 export 'src/security/authentication/handlers/announce_driver_auth_command_handler.dart';
 export 'src/security/authentication/handlers/authentication_command_handler.dart';
+export 'src/security/authentication/handlers/challenge_response_auth_command_handler.dart';
 
 export 'src/security/authorizion/allow_all_authorizer.dart';
 export 'src/security/authorizion/authorizer.dart';

@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:automated_testing_framework_models/automated_testing_framework_models.dart';
 import 'package:automated_testing_framework_server_websocket/automated_testing_framework_server_websocket.dart';
-import 'package:automated_testing_framework_server_websocket/src/security/authentication/handlers/challenge_response_auth_command_handler.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 

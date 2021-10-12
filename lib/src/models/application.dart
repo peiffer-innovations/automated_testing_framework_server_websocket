@@ -3,9 +3,19 @@ import 'dart:async';
 import 'package:automated_testing_framework_server_websocket/automated_testing_framework_server_websocket.dart';
 
 class Application {
-  Application({
-    required this.appIdentifier,
+  factory Application({
+    required String appIdentifier,
     Duration staleTimeout = const Duration(minutes: 15),
+  }) =>
+      _applications[appIdentifier] ??
+      Application.create(
+        appIdentifier: appIdentifier,
+        staleTimeout: staleTimeout,
+      );
+
+  Application.create({
+    required this.appIdentifier,
+    required Duration staleTimeout,
   }) {
     _timer = Timer.periodic(Duration(minutes: 1), (timer) {
       var timeout =
@@ -28,8 +38,17 @@ class Application {
         }
       });
       sessions.removeWhere((key, value) => staleSessions.contains(key));
+
+      if (devices.isEmpty == true &&
+          drivers.isEmpty == true &&
+          sessions.isEmpty == true) {
+        stop();
+      }
     });
   }
+
+  static final Map<String, Application> _applications = {};
+  static Iterable<Application> get all => _applications.values;
 
   final String appIdentifier;
 
@@ -41,5 +60,8 @@ class Application {
 
   void stop() {
     _timer?.cancel();
+    _timer = null;
+
+    _applications.remove(appIdentifier);
   }
 }
