@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   args: ^2.3.0
-  automated_testing_framework_models: ^2.0.7+4
+  automated_testing_framework_models: ^2.0.8
   json_class: ^2.0.0+2
   logging: ^1.0.2
   meta: ^1.7.0
