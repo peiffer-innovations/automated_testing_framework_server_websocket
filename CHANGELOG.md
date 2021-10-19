@@ -1,3 +1,9 @@
+## [1.0.2] - October 19th, 2021
+
+* Auth update
+* Fix for `CustomServerCommandHandler` definition
+
+
 ## [1.0.1] - October 12th, 2021
 
 * Fix export

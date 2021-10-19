@@ -57,7 +57,7 @@ class DefaultAuthenticator extends Authenticator {
         }
       } else {
         logger.info(
-          '[CLOSE]: unknown command, ignoring...',
+          '[CLOSE]: unknown command type: [${cmd.type}], ignoring...',
         );
         completer?.complete(null);
         completer = null;
