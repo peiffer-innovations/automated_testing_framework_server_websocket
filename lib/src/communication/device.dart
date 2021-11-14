@@ -37,7 +37,9 @@ class Device extends WebSocketCommunicator {
   /// pool should it reconnect.
   @override
   void close() {
-    sendCommand(ReleaseDeviceCommand(deviceId: device.id));
+    sendCommand(ReleaseDeviceCommand(deviceId: device.id)).catchError(
+      (e, stack) => logger.info('[CLOSE]: Error sending close command'),
+    );
 
     super.close();
   }

@@ -1,3 +1,8 @@
+## [1.0.3] - November 14th, 2021
+
+* Bug fixes and logging improvement
+
+
 ## [1.0.2] - October 19th, 2021
 
 * Auth update

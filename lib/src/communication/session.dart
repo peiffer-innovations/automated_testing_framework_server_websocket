@@ -42,7 +42,15 @@ class Session {
       device.close();
       driver.close();
 
-      await onClose();
+      try {
+        await onClose();
+      } catch (e, stack) {
+        _logger.info(
+          '[SESSION]: error encountered while closing the session',
+          e,
+          stack,
+        );
+      }
     }
   }
 

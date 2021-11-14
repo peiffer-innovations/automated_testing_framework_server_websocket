@@ -211,16 +211,20 @@ class Server {
                 communicator: comm!,
               )
                   .then((authorized) {
-                if (authorized) {
-                  comm!.onCommandReceived(cmd);
-                } else {
-                  comm!.sendCommand(
-                    CommandAck(
-                      commandId: cmd.id,
-                      message: 'UNAUTHORIZED',
-                      success: false,
-                    ),
-                  );
+                try {
+                  if (authorized) {
+                    comm!.onCommandReceived(cmd);
+                  } else {
+                    comm!.sendCommand(
+                      CommandAck(
+                        commandId: cmd.id,
+                        message: 'UNAUTHORIZED',
+                        success: false,
+                      ),
+                    );
+                  }
+                } catch (e, stack) {
+                  _logger.severe('[SERVER]: uncaught error.', e, stack);
                 }
               });
             },
