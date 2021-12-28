@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:automated_testing_framework_models/automated_testing_framework_models.dart';
 import 'package:automated_testing_framework_server_websocket/automated_testing_framework_server_websocket.dart';
-import 'package:automated_testing_framework_server_websocket/src/models/authentication_state.dart';
 import 'package:logging/logging.dart';
 
 class DefaultAuthenticator extends Authenticator {
