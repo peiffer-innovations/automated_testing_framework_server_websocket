@@ -10,14 +10,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: dart pub upgrade
-      - name: Dart Analyzer
-        run: dart analyze lib
-      - name: Code Format
-        run: dart format --set-exit-if-changed lib test
-      - name: Run tests
-        run: dart test
+      - name: Validate
+        uses: peiffer-innovations/actions-flutter-validate@v1.1.2
+        with:
+          flutter_package: false
       - name: Publish
         uses: peiffer-innovations/actions-pub-publish@v1.0.1
         with:
