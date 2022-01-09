@@ -11,16 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
-        run: pub upgrade
+        run: dart pub upgrade
       - name: Dart Analyzer
-        run: dartanalyzer lib
+        run: dart analyze lib
       - name: Code Format
-        run: dartfmt --set-exit-if-changed -w lib test
+        run: dart format --set-exit-if-changed lib test
       - name: Run tests
-        run: pub run test
+        run: dart test
       - name: Publish
-        uses: sakebook/actions-flutter-pub-publisher@v1.3.1
+        uses: peiffer-innovations/actions-pub-publish@v1.0.1
         with:
-          credential: ${{ secrets.CREDENTIAL_JSON }}
-          flutter_package: false
-          skip_test: true
+          credentials: ${{ secrets.CREDENTIALS_JSON }}
