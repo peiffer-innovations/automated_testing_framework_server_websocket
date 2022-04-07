@@ -4,7 +4,7 @@ version: 1.0.4+1
 homepage: https://github.com/peiffer-innovations/automated_testing_framework_server_websocket
 
 environment:
-  sdk: ">=2.15.0 <3.0.0"
+  sdk: ">=2.16.0 <3.0.0"
 
 dependencies:
   args: ^2.3.0
@@ -12,7 +12,7 @@ dependencies:
   json_class: ^2.1.2+4
   logging: ^1.0.2
   meta: ^1.7.0
-  uuid: ^3.0.5
+  uuid: ^3.0.6
   web_socket_channel: ^2.1.0
 
 # dependency_overrides:
