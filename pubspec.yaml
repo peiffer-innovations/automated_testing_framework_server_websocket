@@ -4,13 +4,13 @@ version: 2.0.0
 homepage: https://github.com/peiffer-innovations/automated_testing_framework_server_websocket
 
 environment:
-  sdk: ">=2.16.0 <3.0.0"
+  sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
   args: ^2.3.1
   automated_testing_framework_models: ^2.0.9
   json_class: ^2.1.2+4
-  logging: ^1.0.2
+  logging: ^1.0.1
   meta: ^1.7.0
   uuid: ^3.0.6
   web_socket_channel: ^2.2.0
@@ -21,3 +21,25 @@ dependencies:
 
 dev_dependencies:
   test: ^1.21.1
+
+ignore_updates:
+  # Ignoring everything in flutter_test as those are all point-in-time entries
+  # can't upgrade without upgrading Flutter itself.
+  - 'async'
+  - 'boolean_selector'
+  - 'characters'
+  - 'charcode'
+  - 'collection'
+  - 'clock'
+  - 'fake_async'
+  - 'file'
+  - 'matcher'
+  - 'material_color_utilities'
+  - 'meta'
+  - 'path'
+  - 'source_span'
+  - 'stack_trace'
+  - 'stream_channel'
+  - 'string_scanner'
+  - 'term_glyph'
+  - 'vector_math'

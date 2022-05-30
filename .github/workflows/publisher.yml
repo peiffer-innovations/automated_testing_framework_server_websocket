@@ -3,6 +3,9 @@ name: Dart Publisher
 on:
   push:
     branches: [main]
+    paths:
+      - .github/workflows/publisher.yml
+      - pubspec.yaml
 
 jobs:
   build:
