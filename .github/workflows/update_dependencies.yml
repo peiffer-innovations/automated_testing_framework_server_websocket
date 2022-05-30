@@ -13,6 +13,5 @@ jobs:
         uses: peiffer-innovations/actions-dart-dependency-updater@v1.0.16
         with:
           merge: true
-          paths: .,example
           pull_request: true
           token: ${{ secrets.REPO_TOKEN }}
