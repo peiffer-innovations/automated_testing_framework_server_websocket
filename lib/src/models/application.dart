@@ -21,20 +21,20 @@ class Application {
     required this.logger,
     required Duration staleTimeout,
   }) {
-    _timer = Timer.periodic(Duration(minutes: 1), (timer) {
+    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
       try {
-        var timeout =
+        final timeout =
             DateTime.now().millisecondsSinceEpoch - staleTimeout.inMilliseconds;
 
-        var staleDevices = devices.keys.where(
+        final staleDevices = devices.keys.where(
             (key) => devices[key]!.lastPing.millisecondsSinceEpoch < timeout);
-        var staleDrivers = drivers.keys.where(
+        final staleDrivers = drivers.keys.where(
             (key) => drivers[key]!.lastPing.millisecondsSinceEpoch < timeout);
 
         devices.removeWhere((key, value) => staleDevices.contains(value));
         drivers.removeWhere((key, value) => staleDrivers.contains(value));
 
-        var staleSessions = <String>[];
+        final staleSessions = <String>[];
         sessions.forEach((key, value) {
           if (staleDevices.contains(value.device) ||
               staleDrivers.contains(value.driver)) {

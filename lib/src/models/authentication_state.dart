@@ -31,7 +31,7 @@ class AuthenticationState {
   /// Returns the current [Application] from the state.  This will be `null` if
   /// the client has not yet sent the application.
   Application? get application {
-    var result = _params[key_application];
+    final result = _params[key_application];
 
     return result is Application ? result : null;
   }
@@ -39,7 +39,7 @@ class AuthenticationState {
   /// Returns the current challenge that has been sent from the [Authenticator]
   /// to the client.  This will be `null` if no challenge has yet been sent.
   ChallengeCommand? get challenge {
-    var result = _params[key_command];
+    final result = _params[key_command];
 
     return result is ChallengeCommand ? result : null;
   }
@@ -47,7 +47,7 @@ class AuthenticationState {
   /// Returns the communicator from the state.  This is only guaranteed to be
   /// not `null` if [success] returns `true`.
   WebSocketCommunicator? get communicator {
-    var result = _params[key_communicator];
+    final result = _params[key_communicator];
 
     return result is WebSocketCommunicator ? result : null;
   }
@@ -58,7 +58,7 @@ class AuthenticationState {
   /// successful.  Finally, `false` means the authentication is complete and not
   /// successful.
   bool? get success {
-    var result = _params[key_success];
+    final result = _params[key_success];
 
     return result is bool ? result : null;
   }

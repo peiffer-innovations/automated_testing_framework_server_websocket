@@ -82,16 +82,16 @@ abstract class WebSocketCommunicator {
   }
 
   Future<void> sendCommand(DeviceCommand command) async {
-    var startTime = DateTime.now().millisecondsSinceEpoch;
-    var timeout = sendTimeout.inMilliseconds;
+    final startTime = DateTime.now().millisecondsSinceEpoch;
+    final timeout = sendTimeout.inMilliseconds;
     logger.finest(
       '[SEND COMMAND]: attempting to send command: [${command.type}]',
     );
     if (command is! GoodbyeCommand) {
       while (_socket?.readyState != WebSocket.open) {
-        await Future.delayed(Duration(seconds: 1));
+        await Future.delayed(const Duration(seconds: 1));
 
-        var waitedTime = DateTime.now().millisecondsSinceEpoch - startTime;
+        final waitedTime = DateTime.now().millisecondsSinceEpoch - startTime;
 
         if (waitedTime > timeout) {
           logger.warning(
@@ -116,7 +116,7 @@ abstract class WebSocketCommunicator {
     _timeoutTimer?.cancel();
     _timeoutTimer = null;
 
-    var pingTimeout = timeout;
+    final pingTimeout = timeout;
     _timeoutTimer = Timer(pingTimeout, () {
       logger.info('[CLOSED]: closed by lack of ping.');
       close();

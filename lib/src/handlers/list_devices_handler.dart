@@ -8,14 +8,14 @@ class ListDevicesHandler {
     WebSocketCommunicator? comm,
   }) async {
     if (command is ListDevicesCommand) {
-      var devices = app!.devices.values
+      final devices = app!.devices.values
           .where((device) =>
               device.online == true &&
               (device.driverName == null || command.availableOnly != true))
           .toList();
       devices.sort((a, b) => a.device.compareTo(b.device));
 
-      var reply = CommandAck(
+      final reply = CommandAck(
         commandId: command.id,
         response: ListDevicesResponse(
           devices: devices

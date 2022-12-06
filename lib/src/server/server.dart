@@ -58,18 +58,18 @@ class Server {
   };
 
   Future<void> listen() async {
-    var server = await HttpServer.bind(
+    final server = await HttpServer.bind(
       address,
       port!,
     );
-    var sub = ProcessSignal.sigint.watch().listen((event) {
+    final sub = ProcessSignal.sigint.watch().listen((event) {
       server.close(force: true);
     });
     try {
       _logger.info('[SERVER]: listening at ${server.address}:${server.port}');
 
       await for (var req in server) {
-        var commandStreamController =
+        final commandStreamController =
             StreamController<DeviceCommand>.broadcast();
         try {
           _logger.info(
@@ -104,8 +104,8 @@ class Server {
               _logger.info('[CLOSE]: onDone called: [${comm?.toString()}]');
 
               if (comm is Driver) {
-                var driver = comm;
-                var inSession = comm.app.sessions.values
+                final driver = comm;
+                final inSession = comm.app.sessions.values
                         .where((session) =>
                             driver.driverId == session.driver.driverId)
                         .isNotEmpty ==
@@ -125,8 +125,8 @@ class Server {
             },
             onError: (e, stack) {
               if (comm is Driver) {
-                var driver = comm;
-                var inSession = comm.app.sessions.values
+                final driver = comm;
+                final inSession = comm.app.sessions.values
                         .where((session) =>
                             driver.driverId == session.driver.driverId)
                         .isNotEmpty ==
@@ -158,17 +158,17 @@ class Server {
           }
 
           if (comm is Driver) {
-            var driver = comm;
-            var sessions = comm.app.sessions.values.where(
+            final driver = comm;
+            final sessions = comm.app.sessions.values.where(
               (session) => session.driver.driverId == driver.driverId,
             );
 
             if (sessions.isNotEmpty == true) {
-              var session = sessions.first;
+              final session = sessions.first;
               session.start();
             } else {
               comm.onCommandReceived = (command) async {
-                var handler =
+                final handler =
                     _customHandlers[command.type] ?? _handlers[command.type];
                 if (handler != null) {
                   await handler(
@@ -180,18 +180,18 @@ class Server {
               };
             }
           } else if (comm is Device) {
-            var device = comm;
-            var sessions = comm.app.sessions.values.where(
+            final device = comm;
+            final sessions = comm.app.sessions.values.where(
               (session) => session.device.device.id == device.device.id,
             );
 
             if (sessions.isNotEmpty == true) {
-              var session = sessions.first;
+              final session = sessions.first;
               session.start();
             }
           } else {
             comm.onCommandReceived = (command) async {
-              var handler =
+              final handler =
                   _customHandlers[command.type] ?? _handlers[command.type];
               if (handler != null) {
                 await handler(

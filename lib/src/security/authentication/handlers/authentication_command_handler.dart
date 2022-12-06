@@ -133,7 +133,7 @@ abstract class AuthenticationCommandHandler {
             '[AUTHENTICATE]: rejecting due to expired challenge response.',
           );
         } else {
-          var signature = DriverSignatureHelper().createSignature(
+          final signature = DriverSignatureHelper().createSignature(
             secret,
             [
               challenge.salt,

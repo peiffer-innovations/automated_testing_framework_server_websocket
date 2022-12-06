@@ -22,15 +22,15 @@ class DefaultAuthenticator extends Authenticator {
     required Stream<DeviceCommand> commandStream,
     required WebSocket socket,
   }) async {
-    var state = AuthenticationState(
+    final state = AuthenticationState(
       commandStream: commandStream,
       socket: socket,
     );
 
     Completer? completer = Completer<void>();
-    var future = completer.future;
+    final future = completer.future;
 
-    Timer? timer = Timer(Duration(minutes: 2), () async {
+    final timer = Timer(const Duration(minutes: 2), () async {
       try {
         logger.info(
           '[CONNECTION]: connection timed out.',
@@ -43,9 +43,9 @@ class DefaultAuthenticator extends Authenticator {
       }
     });
 
-    var sub = commandStream.listen((cmd) async {
+    final sub = commandStream.listen((cmd) async {
       if (_handlers.containsKey(cmd.type)) {
-        var handler = _handlers[cmd.type];
+        final handler = _handlers[cmd.type];
         await handler!.handle(
           command: cmd,
           state: state,

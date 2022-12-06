@@ -16,11 +16,11 @@ class ChallengeResponseAuthCommandHandler extends AuthenticationCommandHandler {
     required DeviceCommand command,
     required AuthenticationState state,
   }) async {
-    var cmd = command as ChallengeResponseCommand;
+    final cmd = command as ChallengeResponseCommand;
 
-    var secret = _secrets[state.communicator!.runtimeType];
+    final secret = _secrets[state.communicator!.runtimeType];
 
-    var valid = secret == null
+    final valid = secret == null
         ? false
         : validateChallengeResponse(
             challenge: state.challenge!,

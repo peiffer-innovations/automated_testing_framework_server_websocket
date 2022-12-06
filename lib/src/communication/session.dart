@@ -26,7 +26,7 @@ class Session {
 
   final Device device;
   final Driver driver;
-  final String id = Uuid().v4();
+  final String id = const Uuid().v4();
   final Future<void> Function() onClose;
 
   final Logger _logger;

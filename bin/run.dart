@@ -25,7 +25,7 @@ Future<void> main(List<String> args) async {
     }
   });
 
-  var parser = ArgParser();
+  final parser = ArgParser();
   parser.addOption(
     'address',
     abbr: 'a',
@@ -42,7 +42,7 @@ Future<void> main(List<String> args) async {
 
   parser.addFlag('help', abbr: 'h');
 
-  var parsed = parser.parse(args);
+  final parsed = parser.parse(args);
 
   if (parsed['help'] == true) {
     // ignore: avoid_print
@@ -59,13 +59,13 @@ Starts the websocket server for the testing framework.
     exit(0);
   }
 
-  var secrets = <String, dynamic>{};
-  var file = File('secret/keys.json');
+  final secrets = <String, dynamic>{};
+  final file = File('secret/keys.json');
   if (file.existsSync()) {
-    var data = file.readAsStringSync();
+    final data = file.readAsStringSync();
     if (data.trim().isNotEmpty == true) {
       try {
-        var result = json.decode(data);
+        final result = json.decode(data);
         secrets['device'] = result['device'];
         secrets['driver'] = result['driver'];
       } catch (e) {
@@ -74,22 +74,22 @@ Starts the websocket server for the testing framework.
     }
   }
 
-  var deviceSecret = secrets['device'] ??
+  final deviceSecret = secrets['device'] ??
       Platform.environment['ATF_DEVICE_SECRET'] ??
-      Uuid().v4();
+      const Uuid().v4();
 
-  var driverSecret = secrets['driver'] ??
+  final driverSecret = secrets['driver'] ??
       Platform.environment['ATF_DRIVER_SECRET'] ??
-      Uuid().v4();
+      const Uuid().v4();
 
   var running = true;
-  var sigintSub = ProcessSignal.sigint.watch().listen((event) {
+  final sigintSub = ProcessSignal.sigint.watch().listen((event) {
     running = false;
 
     // ignore: avoid_print
     print('SIGINT received');
 
-    Timer(Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 2), () {
       // ignore: avoid_print
       print('force quitting');
       exit(0);
@@ -97,7 +97,7 @@ Starts the websocket server for the testing framework.
   });
   try {
     while (running) {
-      var server = Server(
+      final server = Server(
         address: InternetAddress.tryParse(parsed['address']),
         authenticator: DefaultAuthenticator(handlers: {
           AnnounceDeviceCommand.kCommandType:

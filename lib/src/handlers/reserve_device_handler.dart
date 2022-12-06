@@ -11,9 +11,9 @@ class ReserveDeviceHandler {
   }) async {
     if (command is ReserveDeviceCommand) {
       if (comm is Driver) {
-        var device = app!.devices[command.deviceId];
+        final device = app!.devices[command.deviceId];
 
-        var deviceReserved = app.sessions.values
+        final deviceReserved = app.sessions.values
                 .where(
                     (session) => session.device.device.id == command.deviceId)
                 .isNotEmpty ==
@@ -30,13 +30,13 @@ class ReserveDeviceHandler {
             '[RESERVE DEVICE]: sending reservation request to device for [${command.driverName}]',
           );
 
-          var completer = Completer();
+          final completer = Completer();
           Timer? timer = Timer(
             ServerConfiguration().reservationTimeout,
             () => completer
                 .completeError('[TIMEOUT]: reservation request timed out'),
           );
-          var onCmd = device.onCommandReceived;
+          final onCmd = device.onCommandReceived;
           device.onCommandReceived = (cmd) async {
             if (cmd is CommandAck && cmd.commandId == command.id) {
               comm.onCommandReceived = onCmd;

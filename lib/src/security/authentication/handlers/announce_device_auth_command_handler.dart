@@ -13,7 +13,7 @@ class AnnounceDeviceAuthCommandHandler extends AuthenticationCommandHandler {
     required DeviceCommand command,
     required AuthenticationState state,
   }) async {
-    var cmd = command as AnnounceDeviceCommand;
+    final cmd = command as AnnounceDeviceCommand;
 
     respondToChallenge(
       commandId: cmd.id,
@@ -23,14 +23,14 @@ class AnnounceDeviceAuthCommandHandler extends AuthenticationCommandHandler {
       timestamp: cmd.timestamp,
     );
 
-    var app = getApplication(command.appIdentifier);
-    var device = getDevice(
+    final app = getApplication(command.appIdentifier);
+    final device = getDevice(
       app: app,
       deviceInfo: cmd.device,
       testControllerState: cmd.testControllerState,
     );
 
-    var challenge = ChallengeCommand(
+    final challenge = ChallengeCommand(
       salt: DriverSignatureHelper().createSalt(),
     );
     state.communicator = device;
