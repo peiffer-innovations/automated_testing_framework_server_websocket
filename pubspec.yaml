@@ -1,6 +1,6 @@
 name: 'automated_testing_framework_server_websocket'
 description: 'Websocket based server for the Automated Testing Framework driver.'
-version: '2.0.1+1'
+version: '2.0.1+2'
 homepage: 'https://github.com/peiffer-innovations/automated_testing_framework_server_websocket'
 
 environment: 
@@ -8,7 +8,7 @@ environment:
 
 dependencies: 
   args: '^2.3.2'
-  automated_testing_framework_models: '^2.0.10'
+  automated_testing_framework_models: '^2.0.10+1'
   json_class: '^2.1.5+1'
   logging: '^1.1.1'
   meta: '^1.7.0'
