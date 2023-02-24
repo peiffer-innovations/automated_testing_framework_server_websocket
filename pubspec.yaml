@@ -3,22 +3,22 @@ description: 'Websocket based server for the Automated Testing Framework driver.
 version: '2.0.1+4'
 homepage: 'https://github.com/peiffer-innovations/automated_testing_framework_server_websocket'
 
-environment: 
+environment:
   sdk: '>=2.19.0 <4.0.0'
 
-dependencies: 
+dependencies:
   args: '^2.4.0'
   automated_testing_framework_models: '^2.0.10+2'
   json_class: '^2.1.5+2'
   logging: '^1.1.1'
-  meta: '^1.7.0'
+  meta: '^1.8.0'
   uuid: '^3.0.7'
   web_socket_channel: '^2.3.0'
 
-dev_dependencies: 
+dev_dependencies:
   test: '^1.23.1'
 
-ignore_updates: 
+ignore_updates:
   - 'archive'
   - 'async'
   - 'boolean_selector'
